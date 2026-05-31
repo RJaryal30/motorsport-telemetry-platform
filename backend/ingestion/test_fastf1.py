@@ -24,7 +24,7 @@ print(fastest_lap)
 print("********************************")
 
 telemetry = fastest_lap.get_car_data()
-# print(telemetry.head())
+print(telemetry.head())
 print(telemetry.columns.tolist())
 print("********************************")
 print(fastest_lap.get_telemetry().columns.tolist())
