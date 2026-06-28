@@ -1,0 +1,12 @@
+spring.application.name=telemetry-consumer
+
+# Postgres
+spring.datasource.url=jdbc:postgresql://localhost:5432/motorsport_telemetry
+spring.datasource.username=username
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=none
+
+# Kafka
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=telemetry-consumer-group
+spring.kafka.consumer.auto-offset-reset=earliest
