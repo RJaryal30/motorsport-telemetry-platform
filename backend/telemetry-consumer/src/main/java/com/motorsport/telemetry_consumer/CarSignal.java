@@ -2,6 +2,8 @@ package com.motorsport.telemetry_consumer;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,9 +19,11 @@ public class CarSignal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonProperty("lap_id")
     @Column(name = "lap_id")
     private UUID lapId;
 
+    @JsonProperty("session_time_ms")
     @Column(name = "session_time_ms")
     private Long sessionTimeMs;
 

@@ -51,6 +51,7 @@ def to_ms(value):
     return None
 
 laps = session.laps
+message_count = 0
 
 for _, lap in laps.iterrows():
     # Insert lap row
@@ -104,11 +105,13 @@ for _, lap in laps.iterrows():
                 "drs": int(signal["DRS"]) if not pd.isna(signal["DRS"]) else None,
             }
             producer.send("car.signals.raw", key=None, value=message)
+            message_count += 1
     except Exception as e:
         print(f"Skipping signals for lap {lap['LapNumber']} {lap['Driver']}: {e}")
         continue
 
 producer.flush()
+print(f"Published {message_count} messages to Kafka.")
 print("All messages published to Kafka.")
 cursor.close()
 db.close()
