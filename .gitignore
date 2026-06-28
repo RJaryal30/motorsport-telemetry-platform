@@ -17,4 +17,4 @@ postgres_data/
 *.iml
 
 # Mac
-.DS_Store
+backend/telemetry-consumer/src/main/resources/application.properties

@@ -26,17 +26,34 @@ producer = KafkaProducer(
 
 # --- Load FastF1 session ---
 fastf1.Cache.enable_cache("cache")
-session = fastf1.get_session(2024, "Monaco", "R") #change race info here to create new session
+#Change values below to change the session being ingested
+year = 2024
+gp_name = "Monaco"
+session_type = "R" #session_type = "R"  # "R" = Race, "Q" = Qualifying, "P" = Practice
+session = fastf1.get_session(year, gp_name, session_type)
 print("Loading session...")
 session.load()
 print("Session loaded.")
+
+# --- Check if session already exists ---
+cursor.execute("""
+    SELECT id FROM sessions 
+    WHERE year = %s AND gp_name = %s AND session_type = %s
+""", (year, gp_name, session_type))
+existing_session = cursor.fetchone()
+
+if existing_session:
+    print(f"⚠️  Session already exists (ID: {existing_session[0]}). Skipping to avoid duplicates.")
+    cursor.close()
+    db.close()
+    exit()
 
 # --- Insert session row ---
 cursor.execute("""
     INSERT INTO sessions (year, gp_name, session_type)
     VALUES (%s, %s, %s)
     RETURNING id
-""", (2025, "Monaco", "Race"))
+""", (year, gp_name, session_type))
 session_id = cursor.fetchone()[0]
 db.commit()
 print(f"Session inserted: {session_id}")
@@ -51,6 +68,7 @@ def to_ms(value):
     return None
 
 laps = session.laps
+message_count = 0
 
 for _, lap in laps.iterrows():
     # Insert lap row
@@ -104,11 +122,13 @@ for _, lap in laps.iterrows():
                 "drs": int(signal["DRS"]) if not pd.isna(signal["DRS"]) else None,
             }
             producer.send("car.signals.raw", key=None, value=message)
+            message_count += 1
     except Exception as e:
         print(f"Skipping signals for lap {lap['LapNumber']} {lap['Driver']}: {e}")
         continue
 
 producer.flush()
+print(f"Published {message_count} messages to Kafka.")
 print("All messages published to Kafka.")
 cursor.close()
 db.close()
